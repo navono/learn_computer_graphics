@@ -28,6 +28,7 @@ include(Warnings)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CONAN_CXX_FLAGS}")
 
 # Check for LTO support.
 find_lto(CXX)
@@ -38,7 +39,7 @@ find_lto(CXX)
 # All .cpp files in src/
 set(SOURCES
         src/main.cpp
-)
+        include/logger.h)
 
 # All .cpp files in tests/
 set(TESTFILES
@@ -67,6 +68,14 @@ target_set_warnings(${TARGET} ENABLE ALL AS_ERROR ALL DISABLE Annoying)
 # enable link-time-optimization if available for non-debug configurations
 target_enable_lto(${TARGET} optimized)
 
+if (MSVC)
+    # disable warning as error
+    target_compile_options(${TARGET} PRIVATE "/WX-" )
+else()
+    # lots of warnings and all warnings as errors
+    target_compile_options(${TARGET} PRIVATE "-Wall -Wextra -pedantic -Werror")
+endif()
+
 # Set the properties you require, e.g. what C++ standard to use. Here applied to library and main (change as needed).
 set_target_properties(
         ${TARGET}
@@ -74,6 +83,7 @@ set_target_properties(
             CXX_STANDARD 20
             CXX_STANDARD_REQUIRED YES
             CXX_EXTENSIONS NO
+            PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pdb"
 )
 
 # Set up tests (see tests/CMakeLists.txt).

@@ -1,0 +1,8 @@
+# Use the Google style in this project.
+BasedOnStyle: Google
+
+DerivePointerAlignment: false
+PointerAlignment: Left
+ColumnLimit: 120
+
+CommentPragmas: '(@copydoc)'
