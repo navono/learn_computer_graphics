@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "logger.h"
+#include "shader.h"
 
 // clang-format on
 
@@ -15,22 +16,21 @@ void processInput(GLFWwindow* window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-// layout (location=0) in vec3 aPos; // 位置变量的属性位置值为0
 const char* vertexShaderSource =
     "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = vec4(aPos, 1.0);\n"
     "}\0";
 
-// out vec4 FragColor; // 为片段着色器指定一个颜色输出
 const char* fragmentShaderSource =
     "#version 330 core\n"
     "out vec4 FragColor;\n"
+    "uniform vec4 ourColor;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "   FragColor = ourColor;\n"
     "}\n\0";
 
 int main() {
@@ -66,70 +66,18 @@ int main() {
     return -1;
   }
 
-  // 使用着色器语言GLSL(OpenGL Shading Language)编写着色器
-  // 创建一个顶点（Vertex Shader）
-  // build and compile our shader program
-  // ------------------------------------
-  // vertex shader
-  auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  // 着色器与源码绑定
-  glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-  // 编译
-  glCompileShader(vertexShader);
-
-  // 编译错误检测
-  int success;
-  char infoLog[512];
-  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-    LOG_ERROR(logger, "ERROR::SHADER::VERTEX::COMPILATION_FAILED. {}", infoLog);
-    return -1;
-  }
-
-  // 创建片段着色器（计算像素最后的颜色输出
-  auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-  glCompileShader(fragmentShader);
-  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-    LOG_ERROR(logger, "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED. {}", infoLog);
-    return -1;
-  }
-
-  // link shaders
-  // 着色器程序对象(Shader Program Object)
-  // 多个着色器合并之后并最终链接完成的版本。如果要使用刚才编译的着色器我们必须把它们链接(Link)为一个着色器程序对象，
-  // 然后在渲染对象的时候激活这个着色器程序。已激活着色器程序的着色器将在我们发送渲染调用的时候被使用。
-  // 当链接着色器至一个程序的时候，它会把每个着色器的输出链接到下个着色器的输入。当输出和输入不匹配的时候，
-  // 会得到一个连接错误。
-  auto shaderProgram = glCreateProgram();
-
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-
-  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-  if (!success) {
-    glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-    LOG_ERROR(logger, "ERROR::SHADER::PROGRAM::PROGRAMMING_FAILED. {}", infoLog);
-    return -1;
-  }
-
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
+  Shader shader("./shaders/3.3.shaders.vs", "./shaders/3.3.shaders.fs", logger);
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
   // 标准化设备坐标
-  float vertices[] = {
+  GLfloat vertices[] = {
       -0.5f, -0.5f, 0.0f,  // left
       0.5f,  -0.5f, 0.0f,  // right
       0.0f,  0.5f,  0.0f   // top
   };
 
-  unsigned int VBO, VAO;
+  GLuint VBO, VAO;
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
 
@@ -162,14 +110,18 @@ int main() {
 
   // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex
   // buffer object so afterwards we can safely unbind
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  //  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens.
   // Modifying other VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when
   // it's not directly necessary.
-  glBindVertexArray(0);
+  //  glBindVertexArray(0);
+
+  glBindVertexArray(VAO);
 
   // uncomment this call to draw in wireframe polygons.
+  // 第一个参数表示我们打算将其应用到所有的三角形的正面和背面
+  // 第二个参数告诉我们用线来绘制
   //  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // render loop
@@ -185,11 +137,13 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // draw our first triangle
-    glUseProgram(shaderProgram);
+    shader.use();
 
-    // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit
-    // more organized
-    glBindVertexArray(VAO);
+    // update shader uniform
+    auto timeValue = glfwGetTime();
+    auto greenValue = sin(timeValue) / 2.0f + 0.5f;
+    int vertexColorLocation = glGetUniformLocation(shader.ID, "ourColor");
+    glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
     // 第一个参数是我们打算绘制的OpenGL图元的类型
     // 第二个参数指定了顶点数组的起始索引，我们这里填0
@@ -207,7 +161,7 @@ int main() {
   // ------------------------------------------------------------------------
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
-  glDeleteProgram(shaderProgram);
+  glDeleteProgram(shader.ID);
 
   // glfw: terminate, clearing all previously allocated GLFW resources.
   // ------------------------------------------------------------------
