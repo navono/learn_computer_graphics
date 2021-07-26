@@ -122,16 +122,22 @@ int main() {
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
-  // 标准化设备坐标
   float vertices[] = {
-      -0.5f, -0.5f, 0.0f,  // left
-      0.5f,  -0.5f, 0.0f,  // right
-      0.0f,  0.5f,  0.0f   // top
+      0.5f,  0.5f,  0.0f,  // top right
+      0.5f,  -0.5f, 0.0f,  // bottom right
+      -0.5f, -0.5f, 0.0f,  // bottom left
+      -0.5f, 0.5f,  0.0f   // top left
+  };
+  unsigned int indices[] = {
+      // note that we start from 0!
+      0, 1, 3,  // first Triangle
+      1, 2, 3   // second Triangle
   };
 
-  unsigned int VBO, VAO;
+  unsigned int VBO, VAO, EBO;
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
+  glGenBuffers(1, &EBO);
 
   // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
   glBindVertexArray(VAO);
@@ -145,6 +151,9 @@ int main() {
   // GL_DYNAMIC_DRAW：数据会被改变很多。
   // GL_STREAM_DRAW ：数据每次绘制时都会改变。
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
   // 设置顶点属性指针
   // 第一个参数指定我们要配置的顶点属性。我们在顶点着色器中使用layout(location =
@@ -170,7 +179,9 @@ int main() {
   glBindVertexArray(0);
 
   // uncomment this call to draw in wireframe polygons.
-  //  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  // 第一个参数表示我们打算将其应用到所有的三角形的正面和背面
+  // 第二个参数告诉我们用线来绘制
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // render loop
   // -----------
@@ -194,8 +205,15 @@ int main() {
     // 第一个参数是我们打算绘制的OpenGL图元的类型
     // 第二个参数指定了顶点数组的起始索引，我们这里填0
     // 最后一个参数指定我们打算绘制多少个顶点
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    //    glDrawArrays(GL_TRIANGLES, 0, 3);
     // glBindVertexArray(0); // no need to unbind it every time
+
+    // 从当前绑定到 GL_ELEMENT_ARRAY_BUFFER 目标的 EBO 中获取索引
+    // 第一个参数指定了我们绘制的模式
+    // 第二个参数是我们打算绘制顶点的个数
+    // 第三个参数是索引的类型
+    // 最后一个参数里我们可以指定EBO中的偏移量
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     // -------------------------------------------------------------------------------
