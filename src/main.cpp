@@ -72,9 +72,10 @@ int main() {
   // ------------------------------------------------------------------
   // 标准化设备坐标
   GLfloat vertices[] = {
-      -0.5f, -0.5f, 0.0f,  // left
-      0.5f,  -0.5f, 0.0f,  // right
-      0.0f,  0.5f,  0.0f   // top
+      // 位置              // 颜色
+      0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // 右下
+      -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // 左下
+      0.0f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f   // 顶部
   };
 
   GLuint VBO, VAO;
@@ -103,10 +104,13 @@ int main() {
   // 第五个参数叫做步长(Stride)，它告诉我们在连续的顶点属性组之间的间隔。由于下个组位置数据在3个float之后，我们把步长设置为3
   // * sizeof(float)。要注意的是由于我们知道这个数组是紧密排列的（在两个顶点属性之间没有空隙）我们也可以设置为0来让OpenGL决定具体步长是多少（只有当数值是紧密排列时才可用）。
   // 最后一个参数的类型是void*，所以需要我们进行这个奇怪的强制类型转换。它表示位置数据在缓冲中起始位置的偏移量(Offset)。由于位置数据在数组的开头，所以这里是0。
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-  // 以顶点属性位置值作为参数，启用顶点属性；顶点属性默认是禁用的。
+  // 位置属性
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
+  // 颜色属性
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
   // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex
   // buffer object so afterwards we can safely unbind
@@ -138,12 +142,6 @@ int main() {
 
     // draw our first triangle
     shader.use();
-
-    // update shader uniform
-    auto timeValue = glfwGetTime();
-    auto greenValue = sin(timeValue) / 2.0f + 0.5f;
-    int vertexColorLocation = glGetUniformLocation(shader.ID, "ourColor");
-    glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
     // 第一个参数是我们打算绘制的OpenGL图元的类型
     // 第二个参数指定了顶点数组的起始索引，我们这里填0
