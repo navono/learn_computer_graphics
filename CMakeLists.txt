@@ -39,12 +39,13 @@ find_lto(CXX)
 # All .cpp files in src/
 set(SOURCES
         src/main.cpp
-        include/logger.h include/shader.h)
+        src/stb_image.cpp
+)
 
 # All .cpp files in tests/
 set(TESTFILES
         tests/main.cpp
-        )
+)
 
 add_executable(${TARGET} ${SOURCES} ${MY_VERSIONINFO_RC})
 
@@ -76,7 +77,7 @@ else()
     target_compile_options(${TARGET} PRIVATE "-Wall -Wextra -pedantic -Werror")
 endif()
 
-file(COPY ${PROJECT_SOURCE_DIR}/shaders/ DESTINATION "${PROJECT_BINARY_DIR}/bin/shaders/")
+file(COPY resources/ DESTINATION "${PROJECT_BINARY_DIR}/bin/resources/")
 
 # Set the properties you require, e.g. what C++ standard to use. Here applied to library and main (change as needed).
 set_target_properties(
