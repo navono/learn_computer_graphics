@@ -57,7 +57,7 @@ int main() {
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
   GLfloat vertices[] = {
-      // positions          // colors           // texture coords
+      // positions        // colors         // texture coords
       0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top right
       0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
       -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  // bottom left
@@ -102,6 +102,7 @@ int main() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
                   GL_REPEAT);  // set texture wrapping to GL_REPEAT (default wrapping method)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
   // set texture filtering parameters
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -127,8 +128,10 @@ int main() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
                   GL_REPEAT);  // set texture wrapping to GL_REPEAT (default wrapping method)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
   // set texture filtering parameters
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  // 放大(Magnify)和缩小(Minify)操作的时候可以设置纹理过滤的选项，比如可以在纹理被缩小的时候使用邻近过滤，被放大时使用线性过滤
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  // 线性过滤
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   // load image, create texture and generate mipmaps
