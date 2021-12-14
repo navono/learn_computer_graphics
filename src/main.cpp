@@ -135,8 +135,8 @@ int main() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   // load image, create texture and generate mipmaps
-  auto awesomefaceImgPath = "./resources/textures/awesomeface.png";
-  data = stbi_load(awesomefaceImgPath, &width, &height, &nrChannels, 0);
+  auto awesomeFaceImgPath = "./resources/textures/awesomeface.png";
+  data = stbi_load(awesomeFaceImgPath, &width, &height, &nrChannels, 0);
   if (data) {
     // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data
     // type is of GL_RGBA
@@ -144,7 +144,7 @@ int main() {
     // 当前绑定的纹理自动生成所有需要的多级渐远纹理
     glGenerateMipmap(GL_TEXTURE_2D);
   } else {
-    LOG_ERROR(logger, "Failed to load texture: {}", awesomefaceImgPath);
+    LOG_ERROR(logger, "Failed to load texture: {}", awesomeFaceImgPath);
   }
   stbi_image_free(data);
 
