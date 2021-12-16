@@ -1,6 +1,6 @@
 # learn computer graphics
 
-A demonstration of learning computer graphics
+A demonstration of learning computer graphics from [learnOpenGL](https://learnopengl-cn.github.io/).
 
 ## conan
 
