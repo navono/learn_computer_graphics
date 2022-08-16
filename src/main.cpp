@@ -7,7 +7,6 @@
 #include "logger.h"
 #include "shader.h"
 #include "stb_image.h"
-
 // clang-format on
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -152,7 +151,7 @@ int main() {
   // -------------------------------------------------------------------------------------------
   shader.use();  // don't forget to activate/use the shader before setting uniforms!
   // either set it manually like so:
-  glUniform1i(glGetUniformLocation(shader.ID, "texture1"), 0);
+  glUniform1i(glGetUniformLocation(shader.shaderProgram, "texture1"), 0);
   // or set it via the texture class
   shader.setInt("texture2", 1);
 
@@ -189,7 +188,7 @@ int main() {
   // ------------------------------------------------------------------------
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
-  glDeleteProgram(shader.ID);
+  glDeleteProgram(shader.shaderProgram);
 
   // glfw: terminate, clearing all previously allocated GLFW resources.
   // ------------------------------------------------------------------

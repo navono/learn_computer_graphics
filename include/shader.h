@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 
 class Shader {
  public:
-  unsigned int ID;
+  unsigned int shaderProgram;
 
   // constructor generates the shader on the fly
   // ------------------------------------------------------------------------
@@ -67,11 +67,11 @@ class Shader {
     checkCompileErrors(fragment, "FRAGMENT");
 
     // shader Program
-    ID = glCreateProgram();
-    glAttachShader(ID, vertex);
-    glAttachShader(ID, fragment);
-    glLinkProgram(ID);
-    checkCompileErrors(ID, "PROGRAM");
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertex);
+    glAttachShader(shaderProgram, fragment);
+    glLinkProgram(shaderProgram);
+    checkCompileErrors(shaderProgram, "PROGRAM");
 
     // delete the shaders as they're linked into our program now and no longer necessary
     glDeleteShader(vertex);
@@ -80,20 +80,22 @@ class Shader {
 
   // activate the shader
   // ------------------------------------------------------------------------
-  void use() { glUseProgram(ID); }
+  void use() { glUseProgram(shaderProgram); }
 
   // utility uniform functions
   // ------------------------------------------------------------------------
   void setBool(const std::string& name, bool value) const {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+    glUniform1i(glGetUniformLocation(shaderProgram, name.c_str()), (int)value);
   }
 
   // ------------------------------------------------------------------------
-  void setInt(const std::string& name, int value) const { glUniform1i(glGetUniformLocation(ID, name.c_str()), value); }
+  void setInt(const std::string& name, int value) const {
+    glUniform1i(glGetUniformLocation(shaderProgram, name.c_str()), value);
+  }
 
   // ------------------------------------------------------------------------
   void setFloat(const std::string& name, float value) const {
-    glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+    glUniform1f(glGetUniformLocation(shaderProgram, name.c_str()), value);
   }
 
  private:
